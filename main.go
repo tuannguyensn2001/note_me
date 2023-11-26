@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgraph-io/badger/v4"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gocolly/colly"
 	"github.com/rs/zerolog/log"
@@ -31,6 +32,11 @@ type Word struct {
 func main() {
 
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{"*"},
+	}))
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(os.Getenv("DB_URL")).SetServerAPIOptions(serverAPI)
 	cache, err := badger.Open(badger.DefaultOptions("/tmp/badger"))
