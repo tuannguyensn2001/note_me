@@ -15,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/sync/errgroup"
+	"note-me/pkg/translation"
 	"os"
 	"regexp"
 	"strings"
@@ -70,6 +71,30 @@ func main() {
 		}
 		context.JSON(200, gin.H{
 			"data": result,
+		})
+	})
+
+	r.POST("/sentence", func(ctx *gin.Context) {
+		type Payload struct {
+			Sentence string `json:"sentence" form:"sentence" binding:"required"`
+		}
+		var payload Payload
+		if err := ctx.ShouldBind(&payload); err != nil {
+			ctx.JSON(400, gin.H{
+				"message": "invalid payload",
+			})
+			return
+		}
+
+		res, err := translation.ToSentence(ctx.Request.Context(), payload.Sentence)
+		if err != nil {
+			ctx.JSON(500, gin.H{
+				"message": "translate failed",
+			})
+			return
+		}
+		ctx.JSON(200, gin.H{
+			"data": res,
 		})
 	})
 
